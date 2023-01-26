@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart'
+    as http; //it has many classes and func so we use this so it dont clash
 
 import './product.dart';
 
@@ -66,29 +69,44 @@ class Products with ChangeNotifier {
   // }
 
   void addProduct(Product product) {
-    final newProduct = Product(
-        id: DateTime.now().toString(),
-        title: product.title,
-        description: product.description,
-        price: product.price,
-        imageUrl: product.imageUrl);
-    _items.add(newProduct);
-    notifyListeners();
+    final url = Uri.parse(
+        'https://shop-app-d7b3b-default-rtdb.europe-west1.firebasedatabase.app/products.json');
+    http
+        .post(
+      url,
+      body: json.encode({
+        'title': product.title,
+        'description': product.description,
+        'imageUrl': product.imageUrl,
+        'price': product.price,
+        'isFavorite': product.isFavorite,
+      }),
+    )
+        .then(
+      (response) {
+        final newProduct = Product(
+            id: json.decode(response.body)['name'],
+            title: product.title,
+            description: product.description,
+            price: product.price,
+            imageUrl: product.imageUrl);
+        _items.add(newProduct);
+        notifyListeners();
+      },
+    );
   }
 
   void updateProduct(String id, Product newProduct) {
     final prodIndex = _items.indexWhere((element) => element.id == id);
-    if(prodIndex>=0){
+    if (prodIndex >= 0) {
       _items[prodIndex] = newProduct;
-    notifyListeners();
+      notifyListeners();
+    } else {
+      print('...'); // we wont ever reach this point
     }
-    else{
-      print('...');// we wont ever reach this point
-    }
-    
   }
 
-  void deleteProduct(String id){
+  void deleteProduct(String id) {
     _items.removeWhere((element) => element.id == id);
     notifyListeners();
   }

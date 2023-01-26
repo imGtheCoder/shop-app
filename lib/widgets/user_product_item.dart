@@ -33,7 +33,7 @@ class UserProductItem extends StatelessWidget {
               icon: Icon(Icons.delete),
               color: Theme.of(context).errorColor,
               onPressed: () {
-                Provider.of<Products>(context, listen: false).deleteProduct(id);
+                Provider.of<Products>(context, listen: false ).deleteProduct(id);
               },
             )
           ],
