@@ -86,7 +86,7 @@ class Products with ChangeNotifier {
       (response) {
         final newProduct = Product(
             id: json.decode(response.body)['name'],
-            title: product.title,
+            title: product.title, 
             description: product.description,
             price: product.price,
             imageUrl: product.imageUrl);
