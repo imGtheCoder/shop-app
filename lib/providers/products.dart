@@ -87,7 +87,7 @@ class Products with ChangeNotifier {
         ));
       });
       _items = loadedProducts;
-      notifyListeners();
+      notifyListeners(); //\/
     } catch (error) {
       throw (error);
     }
