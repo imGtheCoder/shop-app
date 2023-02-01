@@ -4,6 +4,7 @@ import 'package:http/http.dart'
     as http; //it has many classes and func so we use this so it dont clash
 
 import './product.dart';
+import '../models/http_exception.dart';
 
 class Products with ChangeNotifier {
   List<Product> _items = [
@@ -83,7 +84,7 @@ class Products with ChangeNotifier {
           description: prodData['description'],
           price: prodData['price'],
           isFavorite: prodData['isFavorite'],
-          imageUrl: prodData['imageUrl'], 
+          imageUrl: prodData['imageUrl'],
         ));
       });
       _items = loadedProducts;
@@ -121,9 +122,19 @@ class Products with ChangeNotifier {
     }
   }
 
-  void updateProduct(String id, Product newProduct) {
+  void updateProduct(String id, Product newProduct) async {
     final prodIndex = _items.indexWhere((element) => element.id == id);
     if (prodIndex >= 0) {
+      final url = Uri.parse(
+          'https://shop-app-d7b3b-default-rtdb.europe-west1.firebasedatabase.app/products/$id.json');
+      await http.patch(url,
+          body: json.encode({
+            'title': newProduct.title,
+            'description': newProduct.description,
+            'imageUrl': newProduct.imageUrl,
+            'price': newProduct.price,
+            'isFavorite': newProduct.isFavorite,
+          }));
       _items[prodIndex] = newProduct;
       notifyListeners();
     } else {
@@ -131,8 +142,21 @@ class Products with ChangeNotifier {
     }
   }
 
-  void deleteProduct(String id) {
-    _items.removeWhere((element) => element.id == id);
+  Future<void> deleteProduct(String id) async {
+    final url = Uri.parse(
+        'https://shop-app-d7b3b-default-rtdb.europe-west1.firebasedatabase.app/products/$id.json');
+    final existingProductIndex =
+        _items.indexWhere((element) => element.id == id);
+    var existingProduct = _items[existingProductIndex];
+    final response = await http.delete(url);
+
+    _items.removeAt(existingProductIndex);
     notifyListeners();
+    if (response.statusCode >= 400) {
+      _items.insert(existingProductIndex, existingProduct);
+      notifyListeners();
+      throw HttpException('Could not delete product.');
+    }
+    existingProduct = null;
   }
 }
