@@ -20,18 +20,18 @@ class Product with ChangeNotifier {
     @required this.imageUrl,
     this.isFavorite = false,
   });
-
-  Future<void> toggleFavoriteStatus() async {
+ 
+  Future<void> toggleFavoriteStatus(String token, String userId) async {
     final url = Uri.parse(
-        'https://shop-app-d7b3b-default-rtdb.europe-west1.firebasedatabase.app/products/$id.json');
+        'https://shop-app-d7b3b-default-rtdb.europe-west1.firebasedatabase.app/userFavorites/$userId/$id.json?auth=$token');
     final oldIsFavorite = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
 
-    final response = await http.patch(url,
-        body: json.encode({
-          'isFavorite': isFavorite,
-        }));
+    final response = await http.put(url,
+        body: json.encode(
+          isFavorite,
+        ));
 
     if(response.statusCode >= 400) {
       isFavorite =oldIsFavorite;
