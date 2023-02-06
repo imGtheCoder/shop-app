@@ -43,6 +43,7 @@ class AppDrawer extends StatelessWidget {
             title: Text('Log Out'),
             onTap: () {
               Navigator.of(context).pop();
+              Navigator.of(context).pushReplacementNamed('/'); // add this to ensure you land on auth screen everytime
               Provider.of<Auth>(context, listen: false).logout();
             })
       ]),
