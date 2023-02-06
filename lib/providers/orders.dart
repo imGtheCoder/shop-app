@@ -18,11 +18,13 @@ class OrderItem {
   });
 }
 
+// filtering products based on the logged in user (1)
 class Orders with ChangeNotifier {
   List<OrderItem> _orders = [];
   final String authToken;
+  final String userId;
 
-  Orders(this.authToken, this._orders);
+  Orders(this.authToken, this.userId, this._orders);
 
   List<OrderItem> get orders {
     return [..._orders];
@@ -30,35 +32,45 @@ class Orders with ChangeNotifier {
 
   Future<void> fetchAndSetOrders() async {
     final url = Uri.parse(
-        'https://shop-app-d7b3b-default-rtdb.europe-west1.firebasedatabase.app/orders.json?auth=$authToken');
-    final response = await http.get(url);
-    final extractedData = json.decode(response.body) as Map<String, dynamic>;
-    final List<OrderItem> loadedOrders = [];
-    if(extractedData == null){
-      return;
-    }
-    extractedData.forEach((orderId, orderData) {
-      loadedOrders.add(OrderItem(
-        id: orderId,
-        amount: double.parse(orderData['amount']),
-        dateTime: DateTime.parse(orderData['dateTime']),
-        products: (orderData['products'] as List<dynamic>)
-            .map((item) => CartItem(
+        'https://shop-app-d7b3b-default-rtdb.europe-west1.firebasedatabase.app/orders/$userId.json?auth=$authToken');
+    try {
+      final response = await http.get(url);
+      final List<OrderItem> loadedOrders = [];
+      final extractedData = json.decode(response.body) as Map<String, dynamic>;
+      if (extractedData == null) {
+        return;
+      }
+      extractedData.forEach((orderId, orderData) {
+        loadedOrders.add(OrderItem(
+          id: orderId,
+          amount: orderData['amount'],
+          dateTime: DateTime.parse(orderData['dateTime']),
+          products: (orderData['products'] as List<dynamic>)
+              .map(
+                (item) => CartItem(
                   id: item['id'],
                   title: item['title'],
                   quantity: item['quantity'],
                   price: item['price'],
-                ))
-            .toList(),
-      ));
-    });
-    _orders = loadedOrders.reversed.toList();
-    notifyListeners();
+                ),
+              )
+              .toList(),
+        ));
+      });
+      _orders = loadedOrders.reversed.toList();
+      notifyListeners();
+
+      print(response.statusCode);
+    } catch (error) {
+      print(error.toString() + 'yea');
+      //print('too sad there s an error');
+      
+    }
   }
 
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {
     final url = Uri.parse(
-        'https://shop-app-d7b3b-default-rtdb.europe-west1.firebasedatabase.app/orders.json?auth=$authToken');
+        'https://shop-app-d7b3b-default-rtdb.europe-west1.firebasedatabase.app/orders/$userId.json?auth=$authToken');
     final timeStamp = DateTime.now();
     final response = await http.post(url,
         body: json.encode({
