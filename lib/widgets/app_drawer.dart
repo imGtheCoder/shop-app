@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../screens/products_overview_screen.dart';
 import '../screens/user_products_screen.dart';
 import '../screens/orders_screen.dart';
+import '../helpers/custom_route.dart';
 
 import '../providers/auth.dart';
 
@@ -21,7 +22,8 @@ class AppDrawer extends StatelessWidget {
             leading: Icon(Icons.shop),
             title: Text('Shop'),
             onTap: () {
-              Navigator.of(context).pushReplacementNamed(ProductsOverviewScreen.routeName);
+              Navigator.of(context)
+                  .pushReplacementNamed(ProductsOverviewScreen.routeName);
             }),
         Divider(),
         ListTile(
@@ -29,13 +31,17 @@ class AppDrawer extends StatelessWidget {
             title: Text('Orders'),
             onTap: () {
               Navigator.of(context).pushReplacementNamed(OrdersScreen.routeName);
+              // Navigator.of(context).pushReplacement(CustomRoute(
+              //   builder: (context) => OrdersScreen(),
+              // ));
             }),
         Divider(),
         ListTile(
             leading: Icon(Icons.edit),
             title: Text('Manage Products'),
             onTap: () {
-              Navigator.of(context).pushReplacementNamed(UserProductsScreen.routeName);
+              Navigator.of(context)
+                  .pushReplacementNamed(UserProductsScreen.routeName);
             }),
         Divider(),
         ListTile(
@@ -43,7 +49,8 @@ class AppDrawer extends StatelessWidget {
             title: Text('Log Out'),
             onTap: () {
               Navigator.of(context).pop();
-              Navigator.of(context).pushReplacementNamed('/'); // add this to ensure you land on auth screen everytime
+              Navigator.of(context).pushReplacementNamed(
+                  '/'); // add this to ensure you land on auth screen everytime
               Provider.of<Auth>(context, listen: false).logout();
             })
       ]),
